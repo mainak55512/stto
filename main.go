@@ -19,13 +19,20 @@ func main() {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"File Type", "File Count", "Number of Lines"})
+	table.SetHeader([]string{"File Type", "File Count", "Number of Lines", "Gap", "Code"})
 	for _, item := range file_details {
 		table.Append([]string{
 			item.ext,
 			fmt.Sprint(item.file_count),
 			fmt.Sprint(item.line_count),
+			fmt.Sprint(item.gap),
+			fmt.Sprint(item.code),
 		})
 	}
 	table.Render()
+	total_files, total_lines, total_gaps, total_code := getTotalCounts(&file_details)
+	fmt.Println("Total files: ", total_files)
+	fmt.Println("Total lines: ", total_lines)
+	fmt.Println("Total gaps: ", total_gaps)
+	fmt.Println("Total code: ", total_code)
 }
