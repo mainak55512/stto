@@ -12,10 +12,11 @@ type File_details struct {
 	file_count int32
 	code       int32
 	gap        int32
+	comments   int32
 	line_count int32
 }
 
-func countLines(file_name string) (int32, int32, int32) {
+func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	file, err := os.Open(file_name)
 	if err != nil {
 		panic(err)
@@ -24,27 +25,33 @@ func countLines(file_name string) (int32, int32, int32) {
 	reader := bufio.NewReader(file)
 	var code int32 = 0
 	var gap int32 = 0
+	var comments int32 = 0
+	comment_str, exists := comment_map[ext]
 	for {
 		content, _, err := reader.ReadLine()
+		content_str := string(content[:])
 		if err != nil {
 			break
 		}
-		if string(content[:]) == "" {
+		if content_str == "" {
 			gap++
+		} else if exists == true && strings.HasPrefix(content_str, comment_str) {
+			comments++
 		} else {
 			code++
 		}
 	}
-	return code, gap, (code + gap)
+	return code, gap, comments, (code + gap + comments)
 }
 
 func addNewEntry(file fs.DirEntry, ext string, file_details *[]File_details) {
-	code, gap, line_count := countLines(file.Name())
+	code, gap, comments, line_count := countLines(file.Name(), ext)
 	*file_details = append(*file_details, File_details{
 		ext:        ext,
 		file_count: 1,
 		code:       code,
 		gap:        gap,
+		comments:   comments,
 		line_count: line_count,
 	})
 }
@@ -53,10 +60,11 @@ func updateExistingEntry(file fs.DirEntry, ext string, file_details *[]File_deta
 	for i := range *file_details {
 		if (*file_details)[i].ext == ext {
 			*check = true
-			code, gap, line_count := countLines(file.Name())
+			code, gap, comments, line_count := countLines(file.Name(), ext)
 			(*file_details)[i].file_count += 1
 			(*file_details)[i].code += code
 			(*file_details)[i].gap += gap
+			(*file_details)[i].comments += comments
 			(*file_details)[i].line_count += line_count
 			break
 		}
@@ -82,16 +90,19 @@ func getFileDetails(file fs.DirEntry, file_details *[]File_details) {
 	}
 }
 
-func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32) {
+// testing comment functionality
+func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, int32) {
 	var file_count int32 = 0
 	var line_count int32 = 0
 	var gap int32 = 0
 	var code int32 = 0
+	var comments int32 = 0
 	for i := range *file_details {
 		file_count += (*file_details)[i].file_count
 		line_count += (*file_details)[i].line_count
 		gap += (*file_details)[i].gap
 		code += (*file_details)[i].code
+		comments += (*file_details)[i].comments
 	}
-	return file_count, line_count, gap, code
+	return file_count, line_count, gap, comments, code
 }
