@@ -17,6 +17,7 @@ Command-line utility written in Go to check total line of code in a file present
 
 
 ## Usage
+### usage 1:
 ```bash
 ❯ stto
 +--------------------+------------+-----------------+-----+----------+------+
@@ -45,6 +46,15 @@ Command-line utility written in Go to check total line of code in a file present
 | Comments |      8 |
 | Code     |   1367 |
 +----------+--------+
+
+### Usage 2:
+❯ stto -ext c
++-----------+------------+-----------------+-----+----------+------+
+| FILE TYPE | FILE COUNT | NUMBER OF LINES | GAP | COMMENTS | CODE |
++-----------+------------+-----------------+-----+----------+------+
+| c         |         46 |            1113 |  23 |        2 | 1088 |
++-----------+------------+-----------------+-----+----------+------+
+
 ```
 ** Only single line comments are supported
 
