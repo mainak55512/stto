@@ -90,7 +90,6 @@ func getFileDetails(file fs.DirEntry, file_details *[]File_details) {
 	}
 }
 
-// testing comment functionality
 func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, int32) {
 	var file_count int32 = 0
 	var line_count int32 = 0
