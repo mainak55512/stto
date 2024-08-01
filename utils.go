@@ -35,7 +35,7 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 		}
 		if content_str == "" {
 			gap++
-		} else if exists == true && strings.HasPrefix(content_str, comment_str) {
+		} else if exists == true && strings.HasPrefix(strings.TrimSpace(content_str), comment_str) {
 			comments++
 		} else {
 			code++
@@ -71,8 +71,12 @@ func updateExistingEntry(file fs.DirEntry, ext string, file_details *[]File_deta
 	}
 }
 
-func getFileDetails(file fs.DirEntry, file_details *[]File_details) {
+func getFileDetails(file fs.DirEntry, file_details *[]File_details, folder_count *int32, is_git_initialized *bool) {
 	if file.IsDir() {
+		if file.Name() == ".git" && *is_git_initialized == false {
+			*is_git_initialized = true
+		}
+		*folder_count++
 		return
 	}
 	ext := strings.Join(strings.Split(file.Name(), ".")[1:], ".")
