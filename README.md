@@ -44,7 +44,7 @@ Present working directory:  /home/mainak/programs/others
 Total sub-directories:	    4
 Git initialized:	false
 
-Total files:    	    72	Total lines:	      1413
+Total files:	        72	Total lines:	      1413
 Total gaps:	        38	Total comments:	        10
 Total code:	      1365
 
