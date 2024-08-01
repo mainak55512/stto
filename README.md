@@ -47,7 +47,6 @@ Git initialized:	false
 Total files:	        72	Total lines:	      1413
 Total gaps:	        38	Total comments:	        10
 Total code:	      1365
-
 ```
 
 ### Usage 2:
