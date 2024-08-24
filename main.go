@@ -4,11 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
+	mu := &sync.RWMutex{}
+	wg := &sync.WaitGroup{}
 	var lang = flag.String("ext", "none", "filter based on extention")
 	flag.Parse()
 
@@ -21,8 +24,13 @@ func main() {
 		return
 	}
 	for _, file := range files {
-		getFileDetails(file, &file_details, &folder_count, &is_git_initialized)
+		wg.Add(1)
+		go func(wg *sync.WaitGroup, mu *sync.RWMutex) {
+			defer wg.Done()
+			getFileDetails(file, &file_details, &folder_count, &is_git_initialized, mu)
+		}(wg, mu)
 	}
+	wg.Wait()
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"File Type", "File Count", "Number of Lines", "Gap", "comments", "Code"})
