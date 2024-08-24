@@ -44,7 +44,7 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 		}
 		//Checks if [Opening symbol] is present at staring of the line
 		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str),multi_comment_str_open){
-			inside_multi_line_commentt=true
+			inside_multi_line_comment=true
 		} 
 		//Checks if [Closing symbol] is present at staring or at the end of the line
 		if multi_exists && 
