@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/olekukonko/tablewriter"
+	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	var file_details []File_details
 	var folder_count int32
 	var is_git_initialized bool = false
-	files, err := os.ReadDir(".")
+	files, err := getFiles()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -73,4 +73,15 @@ func main() {
 			table.Render()
 		}
 	}
+}
+
+func getFiles() ([]os.FileInfo, error) {
+	var files []os.FileInfo
+
+	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
+		files = append(files, f)
+		fmt.Printf("Visited: %s\n", path)
+		return nil
+	})
+	return files, err
 }

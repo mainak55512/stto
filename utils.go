@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"io/fs"
 	"os"
 	"strings"
 )
@@ -44,7 +43,7 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	return code, gap, comments, (code + gap + comments)
 }
 
-func addNewEntry(file fs.DirEntry, ext string, file_details *[]File_details) {
+func addNewEntry(file os.FileInfo, ext string, file_details *[]File_details) {
 	code, gap, comments, line_count := countLines(file.Name(), ext)
 	*file_details = append(*file_details, File_details{
 		ext:        ext,
@@ -56,7 +55,7 @@ func addNewEntry(file fs.DirEntry, ext string, file_details *[]File_details) {
 	})
 }
 
-func updateExistingEntry(file fs.DirEntry, ext string, file_details *[]File_details, check *bool) {
+func updateExistingEntry(file os.FileInfo, ext string, file_details *[]File_details, check *bool) {
 	for i := range *file_details {
 		if (*file_details)[i].ext == ext {
 			*check = true
@@ -71,7 +70,7 @@ func updateExistingEntry(file fs.DirEntry, ext string, file_details *[]File_deta
 	}
 }
 
-func getFileDetails(file fs.DirEntry, file_details *[]File_details, folder_count *int32, is_git_initialized *bool) {
+func getFileDetails(file os.FileInfo, file_details *[]File_details, folder_count *int32, is_git_initialized *bool) {
 	if file.IsDir() {
 		if file.Name() == ".git" && *is_git_initialized == false {
 			*is_git_initialized = true
