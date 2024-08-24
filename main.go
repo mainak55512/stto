@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 )
@@ -80,7 +81,7 @@ func getFiles() ([]os.FileInfo, error) {
 
 	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
 		files = append(files, f)
-		fmt.Printf("Visited: %s\n", path)
+		logrus.Debug("Visited: %s\n", path)
 		return nil
 	})
 	return files, err
