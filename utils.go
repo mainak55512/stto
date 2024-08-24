@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"strings"
+	"sync"
 )
 
 type File_details struct {
@@ -44,8 +45,8 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	return code, gap, comments, (code + gap + comments)
 }
 
-func addNewEntry(file fs.DirEntry, ext string, file_details *[]File_details) {
-	code, gap, comments, line_count := countLines(file.Name(), ext)
+func addNewEntry(ext string, file_details *[]File_details, code, gap, comments, line_count int32) {
+	// code, gap, comments, line_count := countLines(file.Name(), ext)
 	*file_details = append(*file_details, File_details{
 		ext:        ext,
 		file_count: 1,
@@ -56,11 +57,11 @@ func addNewEntry(file fs.DirEntry, ext string, file_details *[]File_details) {
 	})
 }
 
-func updateExistingEntry(file fs.DirEntry, ext string, file_details *[]File_details, check *bool) {
+func updateExistingEntry(ext string, file_details *[]File_details, check *bool, code, gap, comments, line_count int32) {
 	for i := range *file_details {
 		if (*file_details)[i].ext == ext {
 			*check = true
-			code, gap, comments, line_count := countLines(file.Name(), ext)
+			// code, gap, comments, line_count := countLines(file.Name(), ext)
 			(*file_details)[i].file_count += 1
 			(*file_details)[i].code += code
 			(*file_details)[i].gap += gap
@@ -71,7 +72,7 @@ func updateExistingEntry(file fs.DirEntry, ext string, file_details *[]File_deta
 	}
 }
 
-func getFileDetails(file fs.DirEntry, file_details *[]File_details, folder_count *int32, is_git_initialized *bool) {
+func getFileDetails(file fs.DirEntry, file_details *[]File_details, folder_count *int32, is_git_initialized *bool, mu *sync.RWMutex) {
 	if file.IsDir() {
 		if file.Name() == ".git" && *is_git_initialized == false {
 			*is_git_initialized = true
@@ -83,15 +84,19 @@ func getFileDetails(file fs.DirEntry, file_details *[]File_details, folder_count
 	if ext == "" {
 		return
 	}
+
+	code, gap, comments, line_count := countLines(file.Name(), ext)
+	mu.Lock()
 	if len(*file_details) == 0 {
-		addNewEntry(file, ext, file_details)
+		addNewEntry(ext, file_details, code, gap, comments, line_count)
 	} else if len(*file_details) > 0 {
 		check := false
-		updateExistingEntry(file, ext, file_details, &check)
+		updateExistingEntry(ext, file_details, &check, code, gap, comments, line_count)
 		if check == false {
-			addNewEntry(file, ext, file_details)
+			addNewEntry(ext, file_details, code, gap, comments, line_count)
 		}
 	}
+	mu.Unlock()
 }
 
 func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, int32) {
