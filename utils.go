@@ -2,11 +2,16 @@ package main
 
 import (
 	"bufio"
-	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 )
+
+type File_info struct {
+	file os.FileInfo
+	path string
+}
 
 type File_details struct {
 	ext        string
@@ -27,15 +32,15 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	var code int32 = 0
 	var gap int32 = 0
 	var comments int32 = 0
-	var inside_multi_line_comment bool =false
-	var multi_comment_str_open string=""
-	var multi_comment_str_close string=""
+	var inside_multi_line_comment bool = false
+	var multi_comment_str_open string = ""
+	var multi_comment_str_close string = ""
 	comment_str, exists := comment_map[ext]
-	multi_comment_str_pair,multi_exists :=multi_comment_map[ext]  
+	multi_comment_str_pair, multi_exists := multi_comment_map[ext]
 	//multi_comment_str_pair will have the opening and closing symbols ' : ' separated
-	if multi_exists{
-		multi_comment_str_open=strings.Split(multi_comment_str_pair,":")[0]
-		multi_comment_str_close=strings.Split(multi_comment_str_pair,":")[1]
+	if multi_exists {
+		multi_comment_str_open = strings.Split(multi_comment_str_pair, ":")[0]
+		multi_comment_str_close = strings.Split(multi_comment_str_pair, ":")[1]
 	}
 	for {
 		content, _, err := reader.ReadLine()
@@ -44,20 +49,20 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 			break
 		}
 		//Checks if [Opening symbol] is present at staring of the line
-		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str),multi_comment_str_open){
-			inside_multi_line_comment=true
-		} 
+		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_open) {
+			inside_multi_line_comment = true
+		}
 		//Checks if [Closing symbol] is present at staring or at the end of the line
-		if multi_exists && 
-			strings.HasPrefix(strings.TrimSpace(content_str),multi_comment_str_close) ||
-			strings.HasSuffix(strings.TrimSpace(content_str),multi_comment_str_close){
-			inside_multi_line_comment=false
+		if multi_exists &&
+			strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_close) ||
+			strings.HasSuffix(strings.TrimSpace(content_str), multi_comment_str_close) {
+			inside_multi_line_comment = false
 			comments++
 		}
 		//Moved the inside_multi_line_comment to top condition as it has priority over other cases
-		if inside_multi_line_comment{
+		if inside_multi_line_comment {
 			comments++
-		}else if content_str == "" {
+		} else if content_str == "" {
 			gap++
 		} else if exists == true && strings.HasPrefix(strings.TrimSpace(content_str), comment_str) {
 			comments++
@@ -95,20 +100,20 @@ func updateExistingEntry(ext string, file_details *[]File_details, check *bool, 
 	}
 }
 
-func getFileDetails(file fs.DirEntry, file_details *[]File_details, folder_count *int32, is_git_initialized *bool, mu *sync.RWMutex) {
-	if file.IsDir() {
-		if file.Name() == ".git" && *is_git_initialized == false {
+func getFileDetails(file File_info, file_details *[]File_details, folder_count *int32, is_git_initialized *bool, mu *sync.RWMutex) {
+	if file.file.IsDir() {
+		if file.file.Name() == ".git" && *is_git_initialized == false {
 			*is_git_initialized = true
 		}
 		*folder_count++
 		return
 	}
-	ext := strings.Join(strings.Split(file.Name(), ".")[1:], ".")
+	ext := strings.Join(strings.Split(file.file.Name(), ".")[1:], ".")
 	if ext == "" {
 		return
 	}
 
-	code, gap, comments, line_count := countLines(file.Name(), ext)
+	code, gap, comments, line_count := countLines(file.path, ext)
 	mu.Lock()
 	if len(*file_details) == 0 {
 		addNewEntry(ext, file_details, code, gap, comments, line_count)
@@ -136,4 +141,16 @@ func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, i
 		comments += (*file_details)[i].comments
 	}
 	return file_count, line_count, gap, comments, code
+}
+
+func getFiles() ([]File_info, error) {
+	var files []File_info
+	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
+		files = append(files, File_info{
+			file: f,
+			path: path,
+		})
+		return nil
+	})
+	return files, err
 }

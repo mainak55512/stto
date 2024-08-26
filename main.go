@@ -18,7 +18,7 @@ func main() {
 	var file_details []File_details
 	var folder_count int32
 	var is_git_initialized bool = false
-	files, err := os.ReadDir(".")
+	files, err := getFiles()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
