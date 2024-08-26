@@ -9,8 +9,9 @@ import (
 )
 
 type File_info struct {
-	file os.FileInfo
-	path string
+	name   string
+	path   string
+	is_dir bool
 }
 
 type File_details struct {
@@ -101,14 +102,16 @@ func updateExistingEntry(ext string, file_details *[]File_details, check *bool, 
 }
 
 func getFileDetails(file File_info, file_details *[]File_details, folder_count *int32, is_git_initialized *bool, mu *sync.RWMutex) {
-	if file.file.IsDir() {
-		if file.file.Name() == ".git" && *is_git_initialized == false {
+	if file.is_dir {
+		mu.Lock()
+		if file.name == ".git" && *is_git_initialized == false {
 			*is_git_initialized = true
 		}
 		*folder_count++
+		mu.Unlock()
 		return
 	}
-	ext := strings.Join(strings.Split(file.file.Name(), ".")[1:], ".")
+	ext := strings.Join(strings.Split(file.name, ".")[1:], ".")
 	if ext == "" {
 		return
 	}
@@ -147,8 +150,9 @@ func getFiles() ([]File_info, error) {
 	var files []File_info
 	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
 		files = append(files, File_info{
-			file: f,
-			path: path,
+			name:   f.Name(),
+			path:   path,
+			is_dir: f.IsDir(),
 		})
 		return nil
 	})
