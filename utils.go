@@ -9,9 +9,8 @@ import (
 )
 
 type File_info struct {
-	name   string
-	path   string
-	is_dir bool
+	path string
+	ext  string
 }
 
 type File_details struct {
@@ -101,30 +100,16 @@ func updateExistingEntry(ext string, file_details *[]File_details, check *bool, 
 	}
 }
 
-func getFileDetails(file File_info, file_details *[]File_details, folder_count *int32, is_git_initialized *bool, mu *sync.RWMutex) {
-	if file.is_dir {
-		mu.Lock()
-		if file.name == ".git" && *is_git_initialized == false {
-			*is_git_initialized = true
-		}
-		*folder_count++
-		mu.Unlock()
-		return
-	}
-	ext := strings.Join(strings.Split(file.name, ".")[1:], ".")
-	if ext == "" {
-		return
-	}
-
-	code, gap, comments, line_count := countLines(file.path, ext)
+func getFileDetails(file File_info, file_details *[]File_details, mu *sync.RWMutex) {
+	code, gap, comments, line_count := countLines(file.path, file.ext)
 	mu.Lock()
 	if len(*file_details) == 0 {
-		addNewEntry(ext, file_details, code, gap, comments, line_count)
+		addNewEntry(file.ext, file_details, code, gap, comments, line_count)
 	} else if len(*file_details) > 0 {
 		check := false
-		updateExistingEntry(ext, file_details, &check, code, gap, comments, line_count)
+		updateExistingEntry(file.ext, file_details, &check, code, gap, comments, line_count)
 		if check == false {
-			addNewEntry(ext, file_details, code, gap, comments, line_count)
+			addNewEntry(file.ext, file_details, code, gap, comments, line_count)
 		}
 	}
 	mu.Unlock()
@@ -146,14 +131,23 @@ func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, i
 	return file_count, line_count, gap, comments, code
 }
 
-func getFiles() ([]File_info, error) {
+func getFiles(is_git_initialized *bool, folder_count *int32) ([]File_info, error) {
 	var files []File_info
 	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
-		files = append(files, File_info{
-			name:   f.Name(),
-			path:   path,
-			is_dir: f.IsDir(),
-		})
+		if f.IsDir() {
+			if f.Name() == ".git" && *is_git_initialized == false {
+				*is_git_initialized = true
+			}
+			*folder_count++
+		} else {
+			ext := strings.Join(strings.Split(f.Name(), ".")[1:], ".")
+			if _, exists := comment_map[ext]; exists {
+				files = append(files, File_info{
+					path: path,
+					ext:  ext,
+				})
+			}
+		}
 		return nil
 	})
 	return files, err

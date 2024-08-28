@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	max_goroutines := 1000
+	guard := make(chan struct{}, max_goroutines)
 	mu := &sync.RWMutex{}
 	wg := &sync.WaitGroup{}
 	var lang = flag.String("ext", "none", "filter based on extention")
@@ -18,16 +20,18 @@ func main() {
 	var file_details []File_details
 	var folder_count int32
 	var is_git_initialized bool = false
-	files, err := getFiles()
+	files, err := getFiles(&is_git_initialized, &folder_count)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 	for _, file := range files {
+		guard <- struct{}{}
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, mu *sync.RWMutex) {
 			defer wg.Done()
-			getFileDetails(file, &file_details, &folder_count, &is_git_initialized, mu)
+			getFileDetails(file, &file_details, mu)
+			<-guard
 		}(wg, mu)
 	}
 	wg.Wait()
