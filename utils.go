@@ -43,23 +43,46 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 		if err != nil {
 			break
 		}
-		//Checks if [Opening symbol] is present at staring of the line
-		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str),multi_comment_str_open){
-			inside_multi_line_comment=true
-		} 
-		//Checks if [Closing symbol] is present at staring or at the end of the line
+		//Trimming spaces from each line
+		var trimmed_content_str string =strings.TrimSpace(content_str)
+		//Checking if [Opening symbol] & [Closing symbol] present in the same line.
 		if multi_exists && 
-			strings.HasPrefix(strings.TrimSpace(content_str),multi_comment_str_close) ||
-			strings.HasSuffix(strings.TrimSpace(content_str),multi_comment_str_close){
-			inside_multi_line_comment=false
-			comments++
+			!inside_multi_line_comment && 
+			strings.Contains(trimmed_content_str,multi_comment_str_open){ //Checks if [Opening symbol] is present in the line
+				inside_multi_line_comment=true;
+				//Checks if [Closing symbol] is present anywhere in the line after the [Opening symbol]
+				if(strings.Contains(trimmed_content_str[strings.Index(trimmed_content_str,multi_comment_str_open)+len(multi_comment_str_open):],multi_comment_str_close)){
+					inside_multi_line_comment=false;
+					//If [Opening symbol] is found on the start and [Closing symbol] is found on the end 
+					if(strings.HasPrefix(trimmed_content_str,multi_comment_str_open) && 
+						strings.HasSuffix(trimmed_content_str,multi_comment_str_close)){
+						comments++;
+						continue;
+					}
+				}
+				//If there is some code present before the [Opening symbol]
+				if(!strings.HasPrefix(trimmed_content_str,multi_comment_str_open)){
+					code++;
+					continue;
+				}
+		//Checks if [Closing symbol] is present at anywhere on the line
+		}else if multi_exists && 
+				inside_multi_line_comment &&  
+				strings.Contains(trimmed_content_str,multi_comment_str_close){
+					inside_multi_line_comment=false;
+					//Checks if nothing present after the [Closing symbol] on the line
+					if(strings.HasSuffix(trimmed_content_str,multi_comment_str_close)){
+						comments++;
+						continue;
+					}
 		}
+
 		//Moved the inside_multi_line_comment to top condition as it has priority over other cases
 		if inside_multi_line_comment{
 			comments++
-		}else if content_str == "" {
+		}else if trimmed_content_str == "" {
 			gap++
-		} else if exists == true && strings.HasPrefix(strings.TrimSpace(content_str), comment_str) {
+		} else if exists == true && strings.HasPrefix(trimmed_content_str, comment_str) {
 			comments++
 		} else {
 			code++
