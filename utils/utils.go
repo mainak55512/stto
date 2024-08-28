@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"bufio"
@@ -8,18 +8,18 @@ import (
 	"sync"
 )
 
-type File_info struct {
+type file_info struct {
 	path string
 	ext  string
 }
 
 type File_details struct {
-	ext        string
-	file_count int32
-	code       int32
-	gap        int32
-	comments   int32
-	line_count int32
+	Ext        string
+	File_count int32
+	Code       int32
+	Gap        int32
+	Comments   int32
+	Line_count int32
 }
 
 func countLines(file_name string, ext string) (int32, int32, int32, int32) {
@@ -76,31 +76,31 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 func addNewEntry(ext string, file_details *[]File_details, code, gap, comments, line_count int32) {
 	// code, gap, comments, line_count := countLines(file.Name(), ext)
 	*file_details = append(*file_details, File_details{
-		ext:        ext,
-		file_count: 1,
-		code:       code,
-		gap:        gap,
-		comments:   comments,
-		line_count: line_count,
+		Ext:        ext,
+		File_count: 1,
+		Code:       code,
+		Gap:        gap,
+		Comments:   comments,
+		Line_count: line_count,
 	})
 }
 
 func updateExistingEntry(ext string, file_details *[]File_details, check *bool, code, gap, comments, line_count int32) {
 	for i := range *file_details {
-		if (*file_details)[i].ext == ext {
+		if (*file_details)[i].Ext == ext {
 			*check = true
 			// code, gap, comments, line_count := countLines(file.Name(), ext)
-			(*file_details)[i].file_count += 1
-			(*file_details)[i].code += code
-			(*file_details)[i].gap += gap
-			(*file_details)[i].comments += comments
-			(*file_details)[i].line_count += line_count
+			(*file_details)[i].File_count += 1
+			(*file_details)[i].Code += code
+			(*file_details)[i].Gap += gap
+			(*file_details)[i].Comments += comments
+			(*file_details)[i].Line_count += line_count
 			break
 		}
 	}
 }
 
-func getFileDetails(file File_info, file_details *[]File_details, mu *sync.RWMutex) {
+func GetFileDetails(file file_info, file_details *[]File_details, mu *sync.RWMutex) {
 	code, gap, comments, line_count := countLines(file.path, file.ext)
 	mu.Lock()
 	if len(*file_details) == 0 {
@@ -115,24 +115,24 @@ func getFileDetails(file File_info, file_details *[]File_details, mu *sync.RWMut
 	mu.Unlock()
 }
 
-func getTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, int32) {
+func GetTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, int32) {
 	var file_count int32 = 0
 	var line_count int32 = 0
 	var gap int32 = 0
 	var code int32 = 0
 	var comments int32 = 0
 	for i := range *file_details {
-		file_count += (*file_details)[i].file_count
-		line_count += (*file_details)[i].line_count
-		gap += (*file_details)[i].gap
-		code += (*file_details)[i].code
-		comments += (*file_details)[i].comments
+		file_count += (*file_details)[i].File_count
+		line_count += (*file_details)[i].Line_count
+		gap += (*file_details)[i].Gap
+		code += (*file_details)[i].Code
+		comments += (*file_details)[i].Comments
 	}
 	return file_count, line_count, gap, comments, code
 }
 
-func getFiles(is_git_initialized *bool, folder_count *int32) ([]File_info, error) {
-	var files []File_info
+func GetFiles(is_git_initialized *bool, folder_count *int32) ([]file_info, error) {
+	var files []file_info
 	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
 		if f.IsDir() {
 			if f.Name() == ".git" && *is_git_initialized == false {
@@ -142,7 +142,7 @@ func getFiles(is_git_initialized *bool, folder_count *int32) ([]File_info, error
 		} else {
 			ext := strings.Join(strings.Split(f.Name(), ".")[1:], ".")
 			if _, exists := comment_map[ext]; exists {
-				files = append(files, File_info{
+				files = append(files, file_info{
 					path: path,
 					ext:  ext,
 				})

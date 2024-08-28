@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
+	"mainak55512/stto/utils"
 	"os"
 	"sync"
-
-	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
@@ -17,10 +17,10 @@ func main() {
 	var lang = flag.String("ext", "none", "filter based on extention")
 	flag.Parse()
 
-	var file_details []File_details
+	var file_details []utils.File_details
 	var folder_count int32
 	var is_git_initialized bool = false
-	files, err := getFiles(&is_git_initialized, &folder_count)
+	files, err := utils.GetFiles(&is_git_initialized, &folder_count)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -30,7 +30,7 @@ func main() {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, mu *sync.RWMutex) {
 			defer wg.Done()
-			getFileDetails(file, &file_details, mu)
+			utils.GetFileDetails(file, &file_details, mu)
 			<-guard
 		}(wg, mu)
 	}
@@ -42,16 +42,16 @@ func main() {
 	if *lang == "none" {
 		for _, item := range file_details {
 			table.Append([]string{
-				item.ext,
-				fmt.Sprint(item.file_count),
-				fmt.Sprint(item.line_count),
-				fmt.Sprint(item.gap),
-				fmt.Sprint(item.comments),
-				fmt.Sprint(item.code),
+				item.Ext,
+				fmt.Sprint(item.File_count),
+				fmt.Sprint(item.Line_count),
+				fmt.Sprint(item.Gap),
+				fmt.Sprint(item.Comments),
+				fmt.Sprint(item.Code),
 			})
 		}
 		table.Render()
-		total_files, total_lines, total_gaps, total_comments, total_code := getTotalCounts(&file_details)
+		total_files, total_lines, total_gaps, total_comments, total_code := utils.GetTotalCounts(&file_details)
 		pwd, e := os.Getwd()
 
 		if e != nil {
@@ -65,15 +65,15 @@ func main() {
 	} else {
 		var valid_ext bool = false
 		for _, item := range file_details {
-			if item.ext == *lang {
+			if item.Ext == *lang {
 				valid_ext = true
 				table.Append([]string{
-					item.ext,
-					fmt.Sprint(item.file_count),
-					fmt.Sprint(item.line_count),
-					fmt.Sprint(item.gap),
-					fmt.Sprint(item.comments),
-					fmt.Sprint(item.code),
+					item.Ext,
+					fmt.Sprint(item.File_count),
+					fmt.Sprint(item.Line_count),
+					fmt.Sprint(item.Gap),
+					fmt.Sprint(item.Comments),
+					fmt.Sprint(item.Code),
 				})
 				break
 			}

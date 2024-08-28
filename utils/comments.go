@@ -1,4 +1,4 @@
-package main
+package utils
 
 var comment_map map[string]string = map[string]string{
 	"go":     "//",
