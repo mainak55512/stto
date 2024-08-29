@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,13 +50,13 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 			break
 		}
 		//Checks if [Opening symbol] is present at staring of the line
-		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_open) {
+		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_open) && !inside_multi_line_comment {
 			inside_multi_line_comment = true
+			fmt.Println("multi comment open: ", multi_comment_str_open)
 		}
 		//Checks if [Closing symbol] is present at staring or at the end of the line
 		if multi_exists &&
-			strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_close) ||
-			strings.HasSuffix(strings.TrimSpace(content_str), multi_comment_str_close) {
+			strings.HasSuffix(strings.TrimSpace(content_str), multi_comment_str_close) && inside_multi_line_comment {
 			inside_multi_line_comment = false
 			comments++
 		}
@@ -152,3 +153,5 @@ func GetFiles(is_git_initialized *bool, folder_count *int32) ([]file_info, error
 	})
 	return files, err
 }
+
+/*strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_close) ||*/
