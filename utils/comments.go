@@ -1,4 +1,4 @@
-package main
+package utils
 
 var comment_map map[string]string = map[string]string{
 	"go":     "//",
@@ -56,7 +56,7 @@ var multi_comment_map map[string]string = map[string]string{
 	"scala":  "/*:*/",
 	"zig":    "/*:*/",
 	"gleam":  "/*:*/",
-	"py":     `""":"""`,
+	"py":     "\"\"\":\"\"\"",
 	"sh":     ": ':'",
 	"pl":     "/*:*/",
 	"jl":     "#=:=#",
