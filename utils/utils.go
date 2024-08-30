@@ -2,18 +2,23 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 )
 
+/*
+This is the output structure for the getFiles() function
+*/
 type file_info struct {
 	path string
 	ext  string
 }
 
+/*
+This is the entry structure for file_details array
+*/
 type File_details struct {
 	Ext        string
 	File_count int32
@@ -23,6 +28,9 @@ type File_details struct {
 	Line_count int32
 }
 
+/*
+This concurrently reads the files and returns stats for a single file
+*/
 func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	file, err := os.Open(file_name)
 	if err != nil {
@@ -38,6 +46,7 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	var multi_comment_str_close string = ""
 	comment_str, exists := comment_map[ext]
 	multi_comment_str_pair, multi_exists := multi_comment_map[ext]
+
 	//multi_comment_str_pair will have the opening and closing symbols ' : ' separated
 	if multi_exists {
 		multi_comment_str_open = strings.Split(multi_comment_str_pair, ":")[0]
@@ -49,23 +58,53 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 		if err != nil {
 			break
 		}
-		//Checks if [Opening symbol] is present at staring of the line
-		if multi_exists && strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_open) && !inside_multi_line_comment {
-			inside_multi_line_comment = true
-			fmt.Println("multi comment open: ", multi_comment_str_open)
-		}
-		//Checks if [Closing symbol] is present at staring or at the end of the line
+
+		//Trimming spaces from each line
+		var trimmed_content_str string = strings.TrimSpace(content_str)
+
+		//Checking if [Opening symbol] & [Closing symbol] present in the same line.
 		if multi_exists &&
-			strings.HasSuffix(strings.TrimSpace(content_str), multi_comment_str_close) && inside_multi_line_comment {
+			!inside_multi_line_comment &&
+			strings.Contains(trimmed_content_str, multi_comment_str_open) { //Checks if [Opening symbol] is present in the line
+			inside_multi_line_comment = true
+
+			//Checks if [Closing symbol] is present anywhere in the line after the [Opening symbol]
+			if strings.Contains(trimmed_content_str[strings.Index(trimmed_content_str, multi_comment_str_open)+len(multi_comment_str_open):], multi_comment_str_close) {
+				inside_multi_line_comment = false
+
+				//If [Opening symbol] is found on the start and [Closing symbol] is found on the end
+				if strings.HasPrefix(trimmed_content_str, multi_comment_str_open) &&
+					strings.HasSuffix(trimmed_content_str, multi_comment_str_close) {
+					comments++
+					continue
+				}
+			}
+
+			//If there is some code present before the [Opening symbol]
+			if !strings.HasPrefix(trimmed_content_str, multi_comment_str_open) {
+				code++
+				continue
+			}
+
+			//Checks if [Closing symbol] is present at anywhere on the line
+		} else if multi_exists &&
+			inside_multi_line_comment &&
+			strings.Contains(trimmed_content_str, multi_comment_str_close) {
 			inside_multi_line_comment = false
-			comments++
+
+			//Checks if nothing present after the [Closing symbol] on the line
+			if strings.HasSuffix(trimmed_content_str, multi_comment_str_close) {
+				comments++
+				continue
+			}
 		}
+
 		//Moved the inside_multi_line_comment to top condition as it has priority over other cases
 		if inside_multi_line_comment {
 			comments++
-		} else if content_str == "" {
+		} else if trimmed_content_str == "" {
 			gap++
-		} else if exists == true && strings.HasPrefix(strings.TrimSpace(content_str), comment_str) {
+		} else if exists == true && strings.HasPrefix(trimmed_content_str, comment_str) {
 			comments++
 		} else {
 			code++
@@ -74,8 +113,11 @@ func countLines(file_name string, ext string) (int32, int32, int32, int32) {
 	return code, gap, comments, (code + gap + comments)
 }
 
+/*
+For adding new entry to file_details array
+*/
 func addNewEntry(ext string, file_details *[]File_details, code, gap, comments, line_count int32) {
-	// code, gap, comments, line_count := countLines(file.Name(), ext)
+	// appending new entry
 	*file_details = append(*file_details, File_details{
 		Ext:        ext,
 		File_count: 1,
@@ -86,11 +128,14 @@ func addNewEntry(ext string, file_details *[]File_details, code, gap, comments, 
 	})
 }
 
+/*
+For updating existing entry in file_details array
+*/
 func updateExistingEntry(ext string, file_details *[]File_details, check *bool, code, gap, comments, line_count int32) {
 	for i := range *file_details {
 		if (*file_details)[i].Ext == ext {
 			*check = true
-			// code, gap, comments, line_count := countLines(file.Name(), ext)
+			// updating existing entry
 			(*file_details)[i].File_count += 1
 			(*file_details)[i].Code += code
 			(*file_details)[i].Gap += gap
@@ -101,14 +146,21 @@ func updateExistingEntry(ext string, file_details *[]File_details, check *bool, 
 	}
 }
 
+/*
+It will add or update a file_details{} structure to file_details array using the inputs received(from getFiles())
+*/
 func GetFileDetails(file file_info, file_details *[]File_details, mu *sync.RWMutex) {
 	code, gap, comments, line_count := countLines(file.path, file.ext)
 	mu.Lock()
 	if len(*file_details) == 0 {
 		addNewEntry(file.ext, file_details, code, gap, comments, line_count)
 	} else if len(*file_details) > 0 {
+
+		// to check if the file format is already present in file_details array
 		check := false
 		updateExistingEntry(file.ext, file_details, &check, code, gap, comments, line_count)
+
+		// check == false means the file format isn't present in file_details, hence adding new entry
 		if check == false {
 			addNewEntry(file.ext, file_details, code, gap, comments, line_count)
 		}
@@ -116,6 +168,9 @@ func GetFileDetails(file file_info, file_details *[]File_details, mu *sync.RWMut
 	mu.Unlock()
 }
 
+/*
+It will count total file number, line number, gap, code and comments
+*/
 func GetTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, int32) {
 	var file_count int32 = 0
 	var line_count int32 = 0
@@ -132,11 +187,18 @@ func GetTotalCounts(file_details *[]File_details) (int32, int32, int32, int32, i
 	return file_count, line_count, gap, comments, code
 }
 
+/*
+If not folder, it will return the path and extension of the file.
+*/
 func GetFiles(is_git_initialized *bool, folder_count *int32) ([]file_info, error) {
 	var files []file_info
 	err := filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
+
+		// if it is a folder, then increase the folder count
 		if f.IsDir() {
-			if f.Name() == ".git" && *is_git_initialized == false {
+
+			// if folder name is '.git', then set is_git_initialized to true
+			if path == ".git" && *is_git_initialized == false {
 				*is_git_initialized = true
 			}
 			*folder_count++
@@ -153,5 +215,3 @@ func GetFiles(is_git_initialized *bool, folder_count *int32) ([]file_info, error
 	})
 	return files, err
 }
-
-/*strings.HasPrefix(strings.TrimSpace(content_str), multi_comment_str_close) ||*/
