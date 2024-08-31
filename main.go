@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/olekukonko/tablewriter"
 	"mainak55512/stto/utils"
 	"os"
+	"runtime"
 	"sync"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
@@ -16,6 +18,8 @@ func main() {
 
 	// this channel will limit the goroutine number
 	guard := make(chan struct{}, max_goroutines)
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	mu := &sync.RWMutex{}
 	wg := &sync.WaitGroup{}
