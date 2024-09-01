@@ -13,14 +13,14 @@ import (
 
 func main() {
 
+	// Limiting os threads to available cpu
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	// Limited goroutines to 1000
 	max_goroutines := 1000
 
 	// this channel will limit the goroutine number
 	guard := make(chan struct{}, max_goroutines)
-
-	// Limiting os threads to available cpu
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	mu := &sync.RWMutex{}
 	wg := &sync.WaitGroup{}
