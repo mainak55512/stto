@@ -1,5 +1,9 @@
 package utils
 
+/*
+Single Line comments Map, Key: extension name ,
+value:[Comment symbol]
+*/
 var comment_map map[string]string = map[string]string{
 	"go":     "//",
 	"c":      "//",
@@ -36,7 +40,10 @@ var comment_map map[string]string = map[string]string{
 	"lisp":   ";",
 }
 
-/* Multi Line comments Map, Key: extension name , value:[Opening symbol]:[Closing symbol]   */
+/*
+Multi Line comments Map, Key: extension name ,
+value:[Opening symbol]:[Closing symbol]
+*/
 var multi_comment_map map[string]string = map[string]string{
 	"go":     "/*:*/",
 	"c":      "/*:*/",

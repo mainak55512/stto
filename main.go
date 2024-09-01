@@ -3,13 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/olekukonko/tablewriter"
 	"mainak55512/stto/utils"
 	"os"
+	"runtime"
 	"sync"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
+
+	// Limiting os threads to available cpu
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Limited goroutines to 1000
 	max_goroutines := 1000
@@ -42,14 +47,22 @@ func main() {
 			defer wg.Done()
 			utils.GetFileDetails(file, &file_details, mu)
 
-			// removes an empty structure from guard channel, hence allowing another one to proceed
+			// removes an empty structure from guard channel,
+			// hence allowing another one to proceed
 			<-guard
 		}(wg, mu)
 	}
 	wg.Wait()
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"File Type", "File Count", "Number of Lines", "Gap", "comments", "Code"})
+	table.SetHeader([]string{
+		"File Type",
+		"File Count",
+		"Number of Lines",
+		"Gap",
+		"comments",
+		"Code",
+	})
 
 	// if not extension is provided via --ext flag
 	if *lang == "none" {
@@ -64,7 +77,13 @@ func main() {
 			})
 		}
 		table.Render()
-		total_files, total_lines, total_gaps, total_comments, total_code := utils.GetTotalCounts(&file_details)
+
+		total_files,
+			total_lines,
+			total_gaps,
+			total_comments,
+			total_code := utils.GetTotalCounts(&file_details)
+
 		pwd, e := os.Getwd()
 
 		if e != nil {
@@ -74,14 +93,32 @@ func main() {
 		fmt.Println("\nStats:\n=======")
 		fmt.Println("Present working directory: ", pwd)
 
-		// total subdirectories are folder_count-1, as present working directory is not a subdirectory
-		fmt.Printf("Total sub-directories:\t%5d\nGit initialized:\t%t\n", folder_count-1, is_git_initialized)
-		fmt.Printf("\nTotal files:\t%10d\tTotal lines:\t%10d\nTotal gaps:\t%10d\tTotal comments:\t%10d\nTotal code:\t%10d\n", total_files, total_lines, total_gaps, total_comments, total_code)
+		// total subdirectories are folder_count-1,
+		// as present working directory is not a subdirectory
+		fmt.Printf(
+			"Total sub-directories:\t%5d\nGit initialized:\t%t\n",
+			folder_count-1,
+			is_git_initialized,
+		)
+		fmt.Printf(
+			"\nTotal files:\t%10d\tTotal lines:\t%10d\n"+
+				"Total gaps:\t%10d\tTotal comments:\t%10d\n"+
+				"Total code:\t%10d\n",
+			total_files,
+			total_lines,
+			total_gaps,
+			total_comments,
+			total_code,
+		)
 	} else {
-		var valid_ext bool = false // will be set to true if atleast one file with provided extension via --ext flag is present
+
+		// will be set to true if atleast one file
+		// with provided extension via --ext flag is present
+		var valid_ext bool = false
 		for _, item := range file_details {
 
-			// checks if extension provided through --ext flag is present in file_details array
+			// checks if extension provided
+			// through --ext flag is present in file_details array
 			if item.Ext == *lang {
 
 				// found valid extension hence setting as true
@@ -98,9 +135,16 @@ func main() {
 			}
 		}
 
-		// if no file with the provided extension is found it will throw error
+		// if no file with the provided
+		// extension is found it will throw error
 		if valid_ext == false {
-			fmt.Println(fmt.Errorf("No file with extension '%s' exists in this directory", *lang))
+			fmt.Println(
+				fmt.Errorf(
+					"No file with extension '%s' "+
+						"exists in this directory",
+					*lang,
+				),
+			)
 		} else {
 			table.Render()
 		}
