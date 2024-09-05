@@ -42,8 +42,8 @@ var lookup_map map[string]Comment_Map = map[string]Comment_Map{
 	"lua":    {	true,"--","--[[","]]--"},  
 	"hs":     {	true,"--","/*","*/"},                    
 	"sql":    {	true,"--","/*","*/"},                    
-	"cbl":    { true,"*","/*","*/"},                   
-	"erl":    { true,"%","=begin","=cut"},                   
-	"clj":    { false,";;","",""},                    
-	"lisp":   { false,";","",""},                   
+	"cbl":    {     true,"*","/*","*/"},                   
+	"erl":    {     true,"%","=begin","=cut"},                   
+	"clj":    {     false,";;","",""},                    
+	"lisp":   {     false,";","",""},                   
 }
