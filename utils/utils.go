@@ -45,23 +45,13 @@ func countLines(
 	var gap int32 = 0
 	var comments int32 = 0
 	var inside_multi_line_comment bool = false
-	var multi_comment_str_open string = ""
-	var multi_comment_str_close string = ""
-	comment_str, exists := comment_map[ext]
-	multi_comment_str_pair, multi_exists := multi_comment_map[ext]
+	var multi_exists bool=false
+	comment_struct, exists := lookup_map[ext]
 
-	//multi_comment_str_pair will have the opening and
-	// closing symbols ' : ' separated
-	if multi_exists {
-		multi_comment_str_open = strings.Split(
-			multi_comment_str_pair,
-			":",
-		)[0]
-		multi_comment_str_close = strings.Split(
-			multi_comment_str_pair,
-			":",
-		)[1]
+	if exists{
+		multi_exists=comment_struct.supports_multi;
 	}
+
 	for {
 		content, _, err := reader.ReadLine()
 		content_str := string(content[:])
@@ -77,7 +67,7 @@ func countLines(
 			!inside_multi_line_comment &&
 			strings.Contains(
 				trimmed_content_str,
-				multi_comment_str_open,
+				comment_struct.multi_comment_open,
 			) {
 			inside_multi_line_comment = true
 
@@ -86,9 +76,9 @@ func countLines(
 			if strings.Contains(
 				trimmed_content_str[strings.Index(
 					trimmed_content_str,
-					multi_comment_str_open,
-				)+len(multi_comment_str_open):],
-				multi_comment_str_close,
+					comment_struct.multi_comment_open,
+				)+len(comment_struct.multi_comment_open):],
+				comment_struct.multi_comment_close,
 			) {
 				inside_multi_line_comment = false
 
@@ -96,10 +86,10 @@ func countLines(
 				// and [Closing symbol] is found on the end
 				if strings.HasPrefix(
 					trimmed_content_str,
-					multi_comment_str_open,
+					comment_struct.multi_comment_open,
 				) && strings.HasSuffix(
 					trimmed_content_str,
-					multi_comment_str_close,
+					comment_struct.multi_comment_close,
 				) {
 					comments++
 					continue
@@ -110,7 +100,7 @@ func countLines(
 			// the [Opening symbol]
 			if !strings.HasPrefix(
 				trimmed_content_str,
-				multi_comment_str_open,
+				comment_struct.multi_comment_open,
 			) {
 				code++
 				continue
@@ -122,7 +112,7 @@ func countLines(
 			inside_multi_line_comment &&
 			strings.Contains(
 				trimmed_content_str,
-				multi_comment_str_close,
+				comment_struct.multi_comment_close,
 			) {
 			inside_multi_line_comment = false
 
@@ -130,7 +120,7 @@ func countLines(
 			// the [Closing symbol] on the line
 			if strings.HasSuffix(
 				trimmed_content_str,
-				multi_comment_str_close,
+				comment_struct.multi_comment_close,
 			) {
 				comments++
 				continue
@@ -143,9 +133,9 @@ func countLines(
 			comments++
 		} else if trimmed_content_str == "" {
 			gap++
-		} else if exists == true && strings.HasPrefix(
+		} else if exists && strings.HasPrefix(
 			trimmed_content_str,
-			comment_str,
+			comment_struct.single_comment,
 		) {
 			comments++
 		} else {
@@ -305,7 +295,7 @@ func GetFiles(
 				strings.Split(f.Name(), ".")[1:],
 				".",
 			)
-			if _, exists := comment_map[ext]; exists {
+			if _, exists := lookup_map[ext]; exists {
 				files = append(files, file_info{
 					path: path,
 					ext:  ext,
