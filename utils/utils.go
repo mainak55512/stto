@@ -45,11 +45,11 @@ func countLines(
 	var gap int32 = 0
 	var comments int32 = 0
 	var inside_multi_line_comment bool = false
-	var multi_exists bool=false
+	var multi_exists bool = false
 	comment_struct, exists := lookup_map[ext]
 
-	if exists{
-		multi_exists=comment_struct.supports_multi;
+	if exists {
+		multi_exists = comment_struct.supports_multi
 	}
 
 	for {
@@ -133,7 +133,7 @@ func countLines(
 			comments++
 		} else if trimmed_content_str == "" {
 			gap++
-		} else if exists && strings.HasPrefix(
+		} else if exists && comment_struct.single_comment != "" && strings.HasPrefix(
 			trimmed_content_str,
 			comment_struct.single_comment,
 		) {
@@ -295,6 +295,9 @@ func GetFiles(
 				strings.Split(f.Name(), ".")[1:],
 				".",
 			)
+			if ext == "" {
+				ext = f.Name()
+			}
 			if _, exists := lookup_map[ext]; exists {
 				files = append(files, file_info{
 					path: path,

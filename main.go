@@ -6,12 +6,15 @@ import (
 	"mainak55512/stto/utils"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"sync"
 
 	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
+
+	debug.SetGCPercent(-1)
 
 	// Limiting os threads to available cpu
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -54,6 +57,7 @@ func main() {
 	}
 	wg.Wait()
 
+	runtime.GC()
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{
 		"File Type",
