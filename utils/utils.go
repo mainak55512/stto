@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -273,20 +274,29 @@ If not folder, it will return the path and extension of the file.
 func GetFiles(
 	is_git_initialized *bool,
 	folder_count *int32,
+	file_directory_name string,
 ) ([]file_info, error) {
 	var files []file_info
-	err := filepath.Walk(".", func(
-		path string,
+	folder_location := "."
+	if file_directory_name != "" {
+		folder_location = path.Join(folder_location, file_directory_name)
+	}
+	err := filepath.Walk(folder_location, func(
+		_path string,
 		f os.FileInfo,
 		err error,
 	) error {
 
+		// Handling the error is there is any during file read
+		if err != nil {
+			return err
+		}
 		// if it is a folder, then increase the folder count
 		if f.IsDir() {
 
 			// if folder name is '.git', then
 			// set is_git_initialized to true
-			if path == ".git" && *is_git_initialized == false {
+			if _path == path.Join(folder_location, ".git") && *is_git_initialized == false {
 				*is_git_initialized = true
 			}
 			*folder_count++
@@ -300,7 +310,7 @@ func GetFiles(
 			}
 			if _, exists := lookup_map[ext]; exists {
 				files = append(files, file_info{
-					path: path,
+					path: _path,
 					ext:  ext,
 				})
 			}

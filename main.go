@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mainak55512/stto/utils"
 	"os"
+	"path"
 	"runtime"
 	"runtime/debug"
 	"sync"
@@ -14,7 +15,8 @@ import (
 
 func main() {
 
-	debug.SetGCPercent(-1)
+	// Optimizing GC
+	debug.SetGCPercent(1000)
 
 	// Limiting os threads to available cpu
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -35,7 +37,13 @@ func main() {
 	var file_details []utils.File_details
 	var folder_count int32
 	var is_git_initialized bool = false
-	files, err := utils.GetFiles(&is_git_initialized, &folder_count)
+	var folder_name string = ""
+	if len(flag.Args()) > 0 {
+		folder_name = flag.Args()[0]
+	}
+
+	files, err := utils.GetFiles(&is_git_initialized, &folder_count, folder_name)
+
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -57,7 +65,6 @@ func main() {
 	}
 	wg.Wait()
 
-	runtime.GC()
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{
 		"File Type",
@@ -67,6 +74,7 @@ func main() {
 		"comments",
 		"Code",
 	})
+	table.SetFooterAlignment(2)
 
 	// if not extension is provided via --ext flag
 	if *lang == "none" {
@@ -80,7 +88,6 @@ func main() {
 				fmt.Sprint(item.Code),
 			})
 		}
-		table.Render()
 
 		total_files,
 			total_lines,
@@ -88,14 +95,24 @@ func main() {
 			total_comments,
 			total_code := utils.GetTotalCounts(&file_details)
 
+		table.SetFooter([]string{
+			"Total:",
+			fmt.Sprint(total_files),
+			fmt.Sprint(total_lines),
+			fmt.Sprint(total_gaps),
+			fmt.Sprint(total_comments),
+			fmt.Sprint(total_code),
+		})
+		table.Render()
+
 		pwd, e := os.Getwd()
 
 		if e != nil {
 			fmt.Println(e)
 			os.Exit(1)
 		}
-		fmt.Println("\nStats:\n=======")
-		fmt.Println("Present working directory: ", pwd)
+
+		fmt.Println("Target directory: ", path.Join(pwd, folder_name))
 
 		// total subdirectories are folder_count-1,
 		// as present working directory is not a subdirectory
@@ -103,16 +120,6 @@ func main() {
 			"Total sub-directories:\t%5d\nGit initialized:\t%t\n",
 			folder_count-1,
 			is_git_initialized,
-		)
-		fmt.Printf(
-			"\nTotal files:\t%10d\tTotal lines:\t%10d\n"+
-				"Total gaps:\t%10d\tTotal comments:\t%10d\n"+
-				"Total code:\t%10d\n",
-			total_files,
-			total_lines,
-			total_gaps,
-			total_comments,
-			total_code,
 		)
 	} else {
 
