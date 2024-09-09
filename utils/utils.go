@@ -283,49 +283,20 @@ func GetFiles(
 	}
 	wgDir := &sync.WaitGroup{}
 	muDir := &sync.RWMutex{}
+	// Limited goroutines to 1000
+	max_goroutines_dir := 1000
+
+	// this channel will limit the goroutine number
+	guardDir := make(chan struct{}, max_goroutines_dir)
+
+	guardDir <- struct{}{}
 	wgDir.Add(1)
-	err := walkDirConcur(folder_location, folder_count, &files, is_git_initialized, wgDir, muDir)
+	err := walkDirConcur(folder_location, folder_count, &files, is_git_initialized, wgDir, muDir, guardDir)
 	wgDir.Wait()
-	// err := filepath.Walk(folder_location, func(
-	// 	_path string,
-	// 	f os.FileInfo,
-	// 	err error,
-	// ) error {
-	//
-	// 	// Handling the error is there is any during file read
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	// if it is a folder, then increase the folder count
-	// 	if f.IsDir() {
-	//
-	// 		// if folder name is '.git', then
-	// 		// set is_git_initialized to true
-	// 		if _path == path.Join(folder_location, ".git") && *is_git_initialized == false {
-	// 			*is_git_initialized = true
-	// 		}
-	// 		*folder_count++
-	// 	} else {
-	// 		ext := strings.Join(
-	// 			strings.Split(f.Name(), ".")[1:],
-	// 			".",
-	// 		)
-	// 		if ext == "" {
-	// 			ext = f.Name()
-	// 		}
-	// 		if _, exists := lookup_map[ext]; exists {
-	// 			files = append(files, file_info{
-	// 				path: _path,
-	// 				ext:  ext,
-	// 			})
-	// 		}
-	// 	}
-	// 	return nil
-	// })
 	return files, err
 }
 
-func walkDirConcur(folder_location string, folder_count *int32, files *[]file_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex) error {
+func walkDirConcur(folder_location string, folder_count *int32, files *[]file_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex, guardDir chan struct{}) error {
 	defer wgDir.Done()
 	visitFolder := func(
 		_path string,
@@ -340,17 +311,21 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]file_in
 		// if it is a folder, then increase the folder count
 		if f.IsDir() && _path != folder_location {
 
-			// fmt.Printf("Folder location: %s; path: %s", folder_location, _path)
 			// if folder name is '.git', then
 			// set is_git_initialized to true
-			muDir.Lock()
-			if _path == path.Join(folder_location, ".git") && *is_git_initialized == false {
-				*is_git_initialized = true
+			if _path == path.Join(folder_location, ".git") {
+				muDir.Lock()
+				if *is_git_initialized == false {
+					*is_git_initialized = true
+				}
+				muDir.Unlock()
 			}
+			muDir.Lock()
 			*folder_count++
 			muDir.Unlock()
+			guardDir <- struct{}{}
 			wgDir.Add(1)
-			go walkDirConcur(_path, folder_count, files, is_git_initialized, wgDir, muDir)
+			go walkDirConcur(_path, folder_count, files, is_git_initialized, wgDir, muDir, guardDir)
 			return filepath.SkipDir
 		}
 		if f.Mode().IsRegular() {
@@ -373,5 +348,6 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]file_in
 		return nil
 	}
 	err := filepath.Walk(folder_location, visitFolder)
+	<-guardDir
 	return err
 }

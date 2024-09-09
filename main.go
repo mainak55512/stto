@@ -21,8 +21,8 @@ func main() {
 	// Limiting os threads to available cpu
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	// Limited goroutines to 1000
-	max_goroutines := 1000
+	// Limited goroutines to 20
+	max_goroutines := 20
 
 	// this channel will limit the goroutine number
 	guard := make(chan struct{}, max_goroutines)
@@ -118,7 +118,7 @@ func main() {
 		// as present working directory is not a subdirectory
 		fmt.Printf(
 			"Total sub-directories:\t%5d\nGit initialized:\t%t\n",
-			folder_count-1,
+			folder_count,
 			is_git_initialized,
 		)
 	} else {
