@@ -283,14 +283,17 @@ func GetFiles(
 	}
 	wgDir := &sync.WaitGroup{}
 	muDir := &sync.RWMutex{}
-	// Limited goroutines to 1000
-	max_goroutines_dir := 1000
+
+	// Limited goroutines to 10000
+	// buffer is set to high to avoid deadlock
+	max_goroutines_dir := 10000
 
 	// this channel will limit the goroutine number
 	guardDir := make(chan struct{}, max_goroutines_dir)
 
 	guardDir <- struct{}{}
 	wgDir.Add(1)
+
 	err := walkDirConcur(folder_location, folder_count, &files, is_git_initialized, wgDir, muDir, guardDir)
 	wgDir.Wait()
 	return files, err
@@ -298,6 +301,7 @@ func GetFiles(
 
 func walkDirConcur(folder_location string, folder_count *int32, files *[]file_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex, guardDir chan struct{}) error {
 	defer wgDir.Done()
+
 	visitFolder := func(
 		_path string,
 		f os.FileInfo,
