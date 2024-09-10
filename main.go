@@ -21,8 +21,8 @@ func main() {
 	// Limiting os threads to available cpu
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	// Limited goroutines to 1000
-	max_goroutines := 1000
+	// Limited goroutines to 20
+	max_goroutines := 20
 
 	// this channel will limit the goroutine number
 	guard := make(chan struct{}, max_goroutines)
@@ -103,24 +103,23 @@ func main() {
 			fmt.Sprint(total_comments),
 			fmt.Sprint(total_code),
 		})
-		table.Render()
 
 		pwd, e := os.Getwd()
+		fmt.Printf(
+			"\nGit initialized:\t%t\nTotal sub-directories:\t%5d\n",
+			is_git_initialized,
+			folder_count,
+		)
+		fmt.Println("Target directory: ", path.Join(pwd, folder_name))
+		fmt.Println()
+
+		table.Render()
 
 		if e != nil {
 			fmt.Println(e)
 			os.Exit(1)
 		}
 
-		fmt.Println("Target directory: ", path.Join(pwd, folder_name))
-
-		// total subdirectories are folder_count-1,
-		// as present working directory is not a subdirectory
-		fmt.Printf(
-			"Total sub-directories:\t%5d\nGit initialized:\t%t\n",
-			folder_count-1,
-			is_git_initialized,
-		)
 	} else {
 
 		// will be set to true if atleast one file
