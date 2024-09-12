@@ -284,9 +284,9 @@ func GetFiles(
 	wgDir := &sync.WaitGroup{}
 	muDir := &sync.RWMutex{}
 
-	// Limited goroutines to 1000
+	// Limited goroutines to 10000
 	// buffer is set to high to avoid deadlock
-	max_goroutines_dir := 1000
+	max_goroutines_dir := 10000
 
 	// this channel will limit the goroutine number
 	guardDir := make(chan struct{}, max_goroutines_dir)
@@ -304,7 +304,7 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]file_in
 
 	visitFolder := func(
 		_path string,
-		f os.FileInfo,
+		f os.DirEntry,
 		err error,
 	) error {
 
@@ -332,7 +332,7 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]file_in
 			go walkDirConcur(_path, folder_count, files, is_git_initialized, wgDir, muDir, guardDir)
 			return filepath.SkipDir
 		}
-		if f.Mode().IsRegular() {
+		if f.Type().IsRegular() {
 			ext := strings.Join(
 				strings.Split(f.Name(), ".")[1:],
 				".",
@@ -351,7 +351,7 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]file_in
 		}
 		return nil
 	}
-	err := filepath.Walk(folder_location, visitFolder)
+	err := filepath.WalkDir(folder_location, visitFolder)
 	<-guardDir
 	return err
 }
