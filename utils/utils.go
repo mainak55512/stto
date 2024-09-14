@@ -284,9 +284,9 @@ func GetFiles(
 	wgDir := &sync.WaitGroup{}
 	muDir := &sync.RWMutex{}
 
-	// Limited goroutines to 10000
+	// Limited goroutines to 1000
 	// buffer is set to high to avoid deadlock
-	max_goroutines_dir := 10000
+	max_goroutines_dir := 1000
 
 	// this channel will limit the goroutine number
 	guardDir := make(chan struct{}, max_goroutines_dir)
