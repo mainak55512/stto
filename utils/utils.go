@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bufio"
-	// "github.com/saracen/walker"
 	"os"
 	"path"
 	"path/filepath"
