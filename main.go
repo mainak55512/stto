@@ -21,15 +21,12 @@ func main() {
 	// Limiting os threads to available cpu
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	// Limited goroutines to 20
-	max_goroutines := 20
-
-	// this channel will limit the goroutine number
-	guard := make(chan struct{}, max_goroutines)
+	// Limited goroutines to 50
+	max_goroutines := 50
 
 	mu := &sync.RWMutex{}
 	wg := &sync.WaitGroup{}
-
+	jobs := make(chan utils.File_info)
 	// flag --ext
 	var lang = flag.String("ext", "none", "filter based on extention")
 	flag.Parse()
@@ -48,21 +45,22 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	for _, file := range files {
 
-		// will block if guard channel is already filled upto 1000
-		guard <- struct{}{}
-
-		wg.Add(1)
-		go func(wg *sync.WaitGroup, mu *sync.RWMutex) {
-			defer wg.Done()
-			utils.GetFileDetails(file, &file_details, mu)
-
-			// removes an empty structure from guard channel,
-			// hence allowing another one to proceed
-			<-guard
-		}(wg, mu)
+	worker := func(jobs <-chan utils.File_info) {
+		defer wg.Done()
+		for job := range jobs {
+			utils.GetFileDetails(job, &file_details, mu)
+		}
 	}
+
+	for i := 1; i <= max_goroutines; i++ {
+		wg.Add(1)
+		go worker(jobs)
+	}
+	for _, f := range files {
+		jobs <- f
+	}
+	close(jobs)
 	wg.Wait()
 
 	table := tablewriter.NewWriter(os.Stdout)

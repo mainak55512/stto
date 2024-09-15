@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	// "github.com/saracen/walker"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 /*
 This is the output structure for the getFiles() function
 */
-type file_info struct {
+type File_info struct {
 	path string
 	ext  string
 }
@@ -199,7 +200,7 @@ It will add or update a file_details{} structure to
 file_details array using the inputs received(from getFiles())
 */
 func GetFileDetails(
-	file file_info,
+	file File_info,
 	file_details *[]File_details,
 	mu *sync.RWMutex,
 ) {
@@ -275,8 +276,8 @@ func GetFiles(
 	is_git_initialized *bool,
 	folder_count *int32,
 	file_directory_name string,
-) ([]file_info, error) {
-	var files []file_info
+) ([]File_info, error) {
+	var files []File_info
 	folder_location := "."
 	if file_directory_name != "" {
 		folder_location = path.Join(folder_location, file_directory_name)
@@ -296,10 +297,11 @@ func GetFiles(
 
 	err := walkDirConcur(folder_location, folder_count, &files, is_git_initialized, wgDir, muDir, guardDir)
 	wgDir.Wait()
+
 	return files, err
 }
 
-func walkDirConcur(folder_location string, folder_count *int32, files *[]file_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex, guardDir chan struct{}) error {
+func walkDirConcur(folder_location string, folder_count *int32, files *[]File_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex, guardDir chan struct{}) error {
 	defer wgDir.Done()
 
 	visitFolder := func(
@@ -342,7 +344,7 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]file_in
 			}
 			if _, exists := lookup_map[ext]; exists {
 				muDir.Lock()
-				*files = append(*files, file_info{
+				*files = append(*files, File_info{
 					path: _path,
 					ext:  ext,
 				})
