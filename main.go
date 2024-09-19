@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"mainak55512/stto/utils"
+	"github.com/mainak55512/stto/utils"
 	"os"
 	"path"
 	"runtime"
@@ -26,7 +26,7 @@ func main() {
 
 	mu := &sync.RWMutex{}
 	wg := &sync.WaitGroup{}
-	jobs := make(chan utils.File_info)
+	jobs := make(chan utils.File_info, 100)
 	// flag --ext
 	var lang = flag.String("ext", "none", "filter based on extention")
 	flag.Parse()

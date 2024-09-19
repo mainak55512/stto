@@ -1,4 +1,4 @@
-module mainak55512/stto
+module github.com/mainak55512/stto
 
 go 1.22.5
 
