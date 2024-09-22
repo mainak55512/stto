@@ -13,7 +13,7 @@ func EmitTable(
 	folder_name *string,
 	is_git_initialized *bool,
 	folder_count *int32,
-) {
+) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{
 		"File Type",
@@ -65,9 +65,11 @@ func EmitTable(
 		table.Render()
 
 		if e != nil {
-			fmt.Println(e)
-			os.Exit(1)
+			// fmt.Println(e)
+			// os.Exit(1)
+			return e
 		}
+		return nil
 
 	} else {
 
@@ -97,15 +99,21 @@ func EmitTable(
 		// if no file with the provided
 		// extension is found it will throw error
 		if valid_ext == false {
-			fmt.Println(
-				fmt.Errorf(
-					"No file with extension '%s' "+
-						"exists in this directory",
-					*lang,
-				),
+			// fmt.Println(
+			// 	fmt.Errorf(
+			// 		"No file with extension '%s' "+
+			// 			"exists in this directory",
+			// 		*lang,
+			// 	),
+			// )
+			return fmt.Errorf(
+				"No file with extension '%s' "+
+					"exists in this directory",
+				*lang,
 			)
 		} else {
 			table.Render()
+			return nil
 		}
 	}
 }
