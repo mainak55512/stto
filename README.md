@@ -32,6 +32,7 @@ Install using the following command for latest features
 go install github.com/mainak55512/stto@latest
 ```
 Alternatively you can use the optimized builds from the [release section](https://github.com/mainak55512/stto/releases)
+
 N.B. Release builds are generally more optimized but lack latest features, 'go install' command is the prefered way to download the executable.
 
 ## Usage
