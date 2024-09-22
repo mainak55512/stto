@@ -32,7 +32,7 @@ Full usage details available in
 stto --help
 ```
 
-### usage 1:
+### Usage 1:
 ![stto_usage_1](./resources/stto_usage_1.png)
 
 ### Usage 2:
