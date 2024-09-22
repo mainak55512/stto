@@ -2,12 +2,9 @@
 
 Command-line utility written in Go to check total line of code in a file present in a directory.
 
-
-
 ## Authors
 
 - [Mainak Bhattacharjee](https://github.com/mainak55512)
-
 
 ## Dependencies
 
@@ -20,6 +17,7 @@ Command-line utility written in Go to check total line of code in a file present
 #### Benchmark was run on the clone of '[Redis](https://github.com/redis/redis)' repository
 
 ![Demo](./resources/benchmark.gif)
+
 **N.B: stto is no way near the more established options like 'scc' or 'tokei' in terms of features. It is in early development stage and isn't production ready.
 
 All the tools read over 1.5k files
@@ -28,11 +26,20 @@ All the tools read over 1.5k files
 ![tokei](./resources/tokei_redis.png)
 
 ## Usage
+
+Full usage details available in 
+```bash
+stto --help
+```
+
 ### usage 1:
 ![stto_usage_1](./resources/stto_usage_1.png)
 
 ### Usage 2:
 ![stto_usage_2](./resources/stto_usage_2.png)
+
+### Usage 3:
+![stto_usage_3](./resources/stto_usage_3.png)
 
 ## 🚀 About Me
 I'm a Tech enthusiast and a hobby programmer.
