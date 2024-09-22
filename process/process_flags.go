@@ -1,6 +1,8 @@
 package process
 
 import (
+	// "encoding/json"
+	// "encoding/json"
 	"fmt"
 	"sync"
 
@@ -11,12 +13,13 @@ func EmitHelpText() string {
 
 	versionDetails := `0.1.3`
 	authorDetails := `mainak55512 (mbhattacharjee432@gmail.com)`
-	flagDetails := "--help\n--ext [extension name]\n"
+	flagDetails := "--help\n--ext [extension name]\n--json\n"
 	helpFlagDetails := "--help\n\tstto --help or,\n\tstto -help\n"
 	extFlagDetails := "--ext\n\tstto --ext [extension name] [(optional) folder name] or,\n\tstto -ext [extension name] [(optional) folder name]"
+	jsonFlagDetails := "\n--json\n\tstto --json"
 	generalUsageDetails := "\n\n[General usage]:\n\tstto or,\n\tstto [folder name]"
 
-	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails
+	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails + jsonFlagDetails
 
 	return returnText
 }
@@ -27,11 +30,24 @@ func ProcessByFlags(file_details *[]utils.File_details, folder_name *string, is_
 
 	if *inpFlags.Help == true {
 		fmt.Println(EmitHelpText())
+	} else if *inpFlags.JSON == true {
+		err := ProcessConcurrentWorkers(file_details, folder_count, folder_name, is_git_initialized, mu, wg)
+		if err != nil {
+			fmt.Println(fmt.Errorf("%w", err))
+		}
+		jsonOutput, err := utils.EmitJSON(inpFlags.Lang, file_details)
+		if err != nil {
+			fmt.Println(fmt.Errorf("%w", err))
+		}
+		fmt.Println(jsonOutput)
 	} else {
 		err := ProcessConcurrentWorkers(file_details, folder_count, folder_name, is_git_initialized, mu, wg)
 		if err != nil {
 			fmt.Println(fmt.Errorf("%w", err))
 		}
-		utils.EmitTable(inpFlags.Lang, file_details, folder_name, is_git_initialized, folder_count)
+		err = utils.EmitTable(inpFlags.Lang, file_details, folder_name, is_git_initialized, folder_count)
+		if err != nil {
+			fmt.Println(fmt.Errorf("%w", err))
+		}
 	}
 }

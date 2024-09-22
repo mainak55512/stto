@@ -21,12 +21,12 @@ type File_info struct {
 This is the entry structure for file_details array
 */
 type File_details struct {
-	Ext        string
-	File_count int32
-	Code       int32
-	Gap        int32
-	Comments   int32
-	Line_count int32
+	Ext        string `json:"ext"`
+	File_count int32  `json:"file_count"`
+	Code       int32  `json:"code"`
+	Gap        int32  `json:"gap"`
+	Comments   int32  `json:"comments"`
+	Line_count int32  `json:"line_count"`
 }
 
 /*
