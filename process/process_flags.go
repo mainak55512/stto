@@ -11,7 +11,7 @@ import (
 
 func EmitHelpText() string {
 
-	versionDetails := `0.1.3`
+	versionDetails := `0.1.4`
 	authorDetails := `mainak55512 (mbhattacharjee432@gmail.com)`
 	flagDetails := "--help\n--ext [extension name]\n--json\n"
 	helpFlagDetails := "--help\n\tstto --help or,\n\tstto -help\n"
