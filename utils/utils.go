@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"os"
 	"strings"
-	// "sync"
 )
 
 /*
@@ -25,6 +24,24 @@ type File_details struct {
 	Gap        int32  `json:"gap"`
 	Comments   int32  `json:"comments"`
 	Line_count int32  `json:"line_count"`
+}
+
+/*
+This emits help text when --help tag is called
+*/
+func EmitHelpText() string {
+
+	versionDetails := `0.1.4`
+	authorDetails := `mainak55512 (mbhattacharjee432@gmail.com)`
+	flagDetails := "--help\n--ext [extension name]\n--json\n"
+	helpFlagDetails := "--help\tShows the usage details\n\n\tstto --help or,\n\tstto -help\n\n"
+	extFlagDetails := "--ext\tFilters output based on the given extension\n\n\tstto --ext [extension name] [(optional) folder name] or,\n\tstto -ext [extension name] [(optional) folder name]\n\n"
+	jsonFlagDetails := "--json\tEmits output in JSON format\n\n\tstto --json\n\n"
+	generalUsageDetails := "\n\n[General usage]:\n\tstto or,\n\tstto [folder name]"
+
+	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails + jsonFlagDetails
+
+	return returnText
 }
 
 /*
