@@ -8,6 +8,7 @@ type FlagOptions struct {
 	Lang *string
 	Help *bool
 	JSON *bool
+	YAML *bool
 }
 
 func HandleFlags(folder_name *string) FlagOptions {
@@ -15,6 +16,7 @@ func HandleFlags(folder_name *string) FlagOptions {
 	var lang = flag.String("ext", "none", "Filter based on extention")
 	var help = flag.Bool("help", false, "Shows help text")
 	var json = flag.Bool("json", false, "get output in json format")
+	var yaml = flag.Bool("yaml", false, "get output in yaml format")
 
 	flag.Parse()
 	if len(flag.Args()) > 0 {
@@ -24,5 +26,6 @@ func HandleFlags(folder_name *string) FlagOptions {
 		Lang: lang,
 		Help: help,
 		JSON: json,
+		YAML: yaml,
 	}
 }
