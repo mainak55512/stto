@@ -18,12 +18,12 @@ type File_info struct {
 This is the entry structure for file_details array
 */
 type File_details struct {
-	Ext        string `json:"ext"`
-	File_count int32  `json:"file_count"`
-	Code       int32  `json:"code"`
-	Gap        int32  `json:"gap"`
-	Comments   int32  `json:"comments"`
-	Line_count int32  `json:"line_count"`
+	Ext        string `json:"ext" yaml:"ext"`
+	File_count int32  `json:"file_count" yaml:"file_count"`
+	Code       int32  `json:"code" yaml:"code"`
+	Gap        int32  `json:"gap" yaml:"gap"`
+	Comments   int32  `json:"comments" yaml:"comments"`
+	Line_count int32  `json:"line_count" yaml:"line_count"`
 }
 
 /*
@@ -31,15 +31,15 @@ This emits help text when --help tag is called
 */
 func EmitHelpText() string {
 
-	versionDetails := `0.1.4`
+	versionDetails := `0.1.5`
 	authorDetails := `mainak55512 (mbhattacharjee432@gmail.com)`
-	flagDetails := "--help\n--ext [extension name]\n--json\n"
+	flagDetails := "--help\n--ext [extension name]\n--json\n--yaml"
 	helpFlagDetails := "--help\tShows the usage details\n\n\tstto --help or,\n\tstto -help\n\n"
 	extFlagDetails := "--ext\tFilters output based on the given extension\n\n\tstto --ext [extension name] [(optional) folder name] or,\n\tstto -ext [extension name] [(optional) folder name]\n\n"
 	jsonFlagDetails := "--json\tEmits output in JSON format\n\n\tstto --json\n\n"
+	yamlFlagDetails := "--yaml\tEmits output in YAML format\n\n\tstto --yaml\n\n"
 	generalUsageDetails := "\n\n[General usage]:\n\tstto or,\n\tstto [folder name]"
-
-	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails + jsonFlagDetails
+	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails + jsonFlagDetails + yamlFlagDetails
 
 	return returnText
 }
