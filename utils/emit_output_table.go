@@ -22,12 +22,21 @@ func EmitTable(
 		"Gap",
 		"comments",
 		"Code",
+		"% Percentage",
 	})
 	table.SetFooterAlignment(2)
 
+	total_files,
+		total_lines,
+		total_gaps,
+		total_comments,
+		total_code := GetTotalCounts(file_details)
+
 	// if not extension is provided via --ext flag
 	if *lang == "none" {
+
 		for _, item := range *file_details {
+			percent := float32(item.Line_count) / float32(total_lines) * 100
 			table.Append([]string{
 				item.Ext,
 				fmt.Sprint(item.File_count),
@@ -35,14 +44,9 @@ func EmitTable(
 				fmt.Sprint(item.Gap),
 				fmt.Sprint(item.Comments),
 				fmt.Sprint(item.Code),
+				fmt.Sprintf("%.2f", percent),
 			})
 		}
-
-		total_files,
-			total_lines,
-			total_gaps,
-			total_comments,
-			total_code := GetTotalCounts(file_details)
 
 		table.SetFooter([]string{
 			"Total:",
@@ -51,6 +55,7 @@ func EmitTable(
 			fmt.Sprint(total_gaps),
 			fmt.Sprint(total_comments),
 			fmt.Sprint(total_code),
+			"100%",
 		})
 
 		pwd, e := os.Getwd()
@@ -82,6 +87,7 @@ func EmitTable(
 			// through --ext flag is present in file_details array
 			if item.Ext == *lang {
 
+				percent := float32(item.Line_count) / float32(total_lines) * 100
 				// found valid extension hence setting as true
 				valid_ext = true
 				table.Append([]string{
@@ -91,6 +97,7 @@ func EmitTable(
 					fmt.Sprint(item.Gap),
 					fmt.Sprint(item.Comments),
 					fmt.Sprint(item.Code),
+					fmt.Sprintf("%.2f", percent),
 				})
 				break
 			}
