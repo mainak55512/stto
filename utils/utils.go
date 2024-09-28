@@ -31,7 +31,7 @@ This emits help text when --help tag is called
 */
 func EmitHelpText() string {
 
-	versionDetails := `0.1.5`
+	versionDetails := `0.1.7`
 	authorDetails := `mainak55512 (mbhattacharjee432@gmail.com)`
 	flagDetails := "--help\n--ext [extension name]\n--json\n--yaml"
 	helpFlagDetails := "--help\tShows the usage details\n\n\tstto --help or,\n\tstto -help\n\n"
