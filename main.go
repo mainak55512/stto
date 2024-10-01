@@ -17,6 +17,8 @@ func main() {
 	// File details array where all the data is stored
 	var file_details []utils.File_details
 
+	var count_details []utils.OutputStructure
+
 	// Tracks sub-directory count
 	var folder_count int32 = 0
 
@@ -27,5 +29,5 @@ func main() {
 
 	process.SetGCOptions()
 
-	process.ProcessByFlags(&file_details, &folder_name, &is_git_initialized, &folder_count, mu, wg)
+	process.ProcessByFlags(&count_details, &file_details, &folder_name, &is_git_initialized, &folder_count, mu, wg)
 }

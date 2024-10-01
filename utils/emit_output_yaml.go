@@ -8,14 +8,15 @@ import (
 
 func EmitYAML(
 	lang *string,
-	file_details *[]File_details,
+	// file_details *[]File_details,
+	count_details *[]OutputStructure,
 ) (string, error) {
 	if *lang != "none" {
-		for _, item := range *file_details {
+		for _, item := range *count_details {
 			// checks if extension provided
 			// through --ext flag is present in file_details array
 			if item.Ext == *lang {
-				yamlOutput, err := yaml.Marshal([]File_details{item})
+				yamlOutput, err := yaml.Marshal([]OutputStructure{item})
 				return string(yamlOutput), err
 			}
 		}
@@ -25,6 +26,6 @@ func EmitYAML(
 			*lang,
 		)
 	}
-	yamlOutput, err := yaml.Marshal(*file_details)
+	yamlOutput, err := yaml.Marshal(*count_details)
 	return string(yamlOutput), err
 }

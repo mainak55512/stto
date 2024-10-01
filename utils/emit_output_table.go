@@ -2,14 +2,17 @@ package utils
 
 import (
 	"fmt"
-	"github.com/olekukonko/tablewriter"
 	"os"
 	"path"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 func EmitTable(
 	lang *string,
-	file_details *[]File_details,
+	count_details *[]OutputStructure,
+	// file_details *[]File_details,
+	total_counts *TotalCount,
 	folder_name *string,
 	is_git_initialized *bool,
 	folder_count *int32,
@@ -26,17 +29,17 @@ func EmitTable(
 	})
 	table.SetFooterAlignment(2)
 
-	total_files,
-		total_lines,
-		total_gaps,
-		total_comments,
-		total_code := GetTotalCounts(file_details)
+	// total_files,
+	// 	total_lines,
+	// 	total_gaps,
+	// 	total_comments,
+	// 	total_code := GetTotalCounts(file_details)
 
 	// if not extension is provided via --ext flag
 	if *lang == "none" {
 
-		for _, item := range *file_details {
-			percent := float32(item.Line_count) / float32(total_lines) * 100
+		for _, item := range *count_details {
+			// percent := float32(item.Line_count) / float32(total_lines) * 100
 			table.Append([]string{
 				item.Ext,
 				fmt.Sprint(item.File_count),
@@ -44,17 +47,17 @@ func EmitTable(
 				fmt.Sprint(item.Gap),
 				fmt.Sprint(item.Comments),
 				fmt.Sprint(item.Code),
-				fmt.Sprintf("%.2f", percent),
+				fmt.Sprintf("%.2f", item.Code_percent),
 			})
 		}
 
 		table.SetFooter([]string{
 			"Total:",
-			fmt.Sprint(total_files),
-			fmt.Sprint(total_lines),
-			fmt.Sprint(total_gaps),
-			fmt.Sprint(total_comments),
-			fmt.Sprint(total_code),
+			fmt.Sprint(total_counts.Total_files),
+			fmt.Sprint(total_counts.Total_lines),
+			fmt.Sprint(total_counts.Total_gaps),
+			fmt.Sprint(total_counts.Total_comments),
+			fmt.Sprint(total_counts.Total_code),
 			"100%",
 		})
 
@@ -81,13 +84,13 @@ func EmitTable(
 		// will be set to true if atleast one file
 		// with provided extension via --ext flag is present
 		var valid_ext bool = false
-		for _, item := range *file_details {
+		for _, item := range *count_details {
 
 			// checks if extension provided
 			// through --ext flag is present in file_details array
 			if item.Ext == *lang {
 
-				percent := float32(item.Line_count) / float32(total_lines) * 100
+				// percent := float32(item.Line_count) / float32(to) * 100
 				// found valid extension hence setting as true
 				valid_ext = true
 				table.Append([]string{
@@ -97,7 +100,7 @@ func EmitTable(
 					fmt.Sprint(item.Gap),
 					fmt.Sprint(item.Comments),
 					fmt.Sprint(item.Code),
-					fmt.Sprintf("%.2f", percent),
+					fmt.Sprintf("%.2f", item.Code_percent),
 				})
 				break
 			}
