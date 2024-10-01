@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -18,12 +19,30 @@ type File_info struct {
 This is the entry structure for file_details array
 */
 type File_details struct {
-	Ext        string `json:"ext" yaml:"ext"`
-	File_count int32  `json:"file_count" yaml:"file_count"`
-	Code       int32  `json:"code" yaml:"code"`
-	Gap        int32  `json:"gap" yaml:"gap"`
-	Comments   int32  `json:"comments" yaml:"comments"`
-	Line_count int32  `json:"line_count" yaml:"line_count"`
+	Ext        string
+	File_count int32
+	Code       int32
+	Gap        int32
+	Comments   int32
+	Line_count int32
+}
+
+type TotalCount struct {
+	Total_files    int32
+	Total_lines    int32
+	Total_gaps     int32
+	Total_comments int32
+	Total_code     int32
+}
+
+type OutputStructure struct {
+	Ext          string  `json:"ext" yaml:"ext"`
+	File_count   int32   `json:"file_count" yaml:"file_count"`
+	Code         int32   `json:"code" yaml:"code"`
+	Gap          int32   `json:"gap" yaml:"gap"`
+	Comments     int32   `json:"comments" yaml:"comments"`
+	Line_count   int32   `json:"line_count" yaml:"line_count"`
+	Code_percent float32 `json:"percentage" yaml:"percentage"`
 }
 
 /*
@@ -231,4 +250,10 @@ func GetTotalCounts(
 		comments += (*file_details)[i].Comments
 	}
 	return file_count, line_count, gap, comments, code
+}
+
+func SortResult(count_details *[]OutputStructure) {
+	sort.Slice(*count_details, func(i, j int) bool {
+		return (*count_details)[i].Line_count > (*count_details)[j].Line_count
+	})
 }
