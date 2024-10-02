@@ -51,6 +51,8 @@ stto --help
 ### Usage 3:
 ![stto_usage_3](./resources/stto_usage_3.png)
 
+N.B. 'jproc' is a json query tool writtrn in javascript. For more details check out the [repo](https://github.com/mainak55512/JSONProcessor).
+
 ## 🚀 About Me
 I'm a Tech enthusiast and a hobby programmer.
 You can visit my [Github profile](https://github.com/mainak55512) to see my other works :)
