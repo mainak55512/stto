@@ -55,7 +55,7 @@ func ProcessByFlags(count_details *[]utils.OutputStructure, file_details *[]util
 			if *inpFlags.Sort == true {
 				utils.SortResult(count_details)
 			}
-			jsonOutput, err := utils.EmitJSON(inpFlags.Lang, count_details)
+			jsonOutput, err := utils.EmitJSON(inpFlags.Lang, inpFlags.NLang, count_details)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%w", err))
 			}
@@ -68,7 +68,7 @@ func ProcessByFlags(count_details *[]utils.OutputStructure, file_details *[]util
 			if *inpFlags.Sort == true {
 				utils.SortResult(count_details)
 			}
-			yamlOutput, err := utils.EmitYAML(inpFlags.Lang, count_details)
+			yamlOutput, err := utils.EmitYAML(inpFlags.Lang, inpFlags.NLang, count_details)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%w", err))
 			}
@@ -81,7 +81,7 @@ func ProcessByFlags(count_details *[]utils.OutputStructure, file_details *[]util
 			if *inpFlags.Sort == true {
 				utils.SortResult(count_details)
 			}
-			err = utils.EmitTable(inpFlags.Lang, count_details, &total_counts, folder_name, is_git_initialized, folder_count)
+			err = utils.EmitTable(inpFlags.Lang, inpFlags.NLang, count_details, &total_counts, folder_name, is_git_initialized, folder_count)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%w", err))
 			}

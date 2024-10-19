@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 )
 
 func EmitTable(
 	lang *string,
+	nlang *string,
 	count_details *[]OutputStructure,
 	// file_details *[]File_details,
 	total_counts *TotalCount,
@@ -29,26 +32,36 @@ func EmitTable(
 	})
 	table.SetFooterAlignment(2)
 
-	// total_files,
-	// 	total_lines,
-	// 	total_gaps,
-	// 	total_comments,
-	// 	total_code := GetTotalCounts(file_details)
-
 	// if not extension is provided via --ext flag
 	if *lang == "none" {
-
 		for _, item := range *count_details {
-			// percent := float32(item.Line_count) / float32(total_lines) * 100
-			table.Append([]string{
-				item.Ext,
-				fmt.Sprint(item.File_count),
-				fmt.Sprint(item.Line_count),
-				fmt.Sprint(item.Gap),
-				fmt.Sprint(item.Comments),
-				fmt.Sprint(item.Code),
-				fmt.Sprintf("%.2f", item.Code_percent),
-			})
+			if *nlang != "none" {
+				n_ext_list := strings.Split(*nlang, ",")
+				for i := range n_ext_list {
+					n_ext_list[i] = strings.TrimSpace(n_ext_list[i])
+				}
+				if !slices.Contains(n_ext_list, item.Ext) {
+					table.Append([]string{
+						item.Ext,
+						fmt.Sprint(item.File_count),
+						fmt.Sprint(item.Line_count),
+						fmt.Sprint(item.Gap),
+						fmt.Sprint(item.Comments),
+						fmt.Sprint(item.Code),
+						fmt.Sprintf("%.2f", item.Code_percent),
+					})
+				}
+			} else {
+				table.Append([]string{
+					item.Ext,
+					fmt.Sprint(item.File_count),
+					fmt.Sprint(item.Line_count),
+					fmt.Sprint(item.Gap),
+					fmt.Sprint(item.Comments),
+					fmt.Sprint(item.Code),
+					fmt.Sprintf("%.2f", item.Code_percent),
+				})
+			}
 		}
 
 		table.SetFooter([]string{
@@ -73,8 +86,6 @@ func EmitTable(
 		table.Render()
 
 		if e != nil {
-			// fmt.Println(e)
-			// os.Exit(1)
 			return e
 		}
 		return nil
@@ -84,13 +95,16 @@ func EmitTable(
 		// will be set to true if atleast one file
 		// with provided extension via --ext flag is present
 		var valid_ext bool = false
+		ext_list := strings.Split(*lang, ",")
+		for i := range ext_list {
+			ext_list[i] = strings.TrimSpace(ext_list[i])
+		}
 		for _, item := range *count_details {
 
 			// checks if extension provided
 			// through --ext flag is present in file_details array
-			if item.Ext == *lang {
+			if slices.Contains(ext_list, item.Ext) {
 
-				// percent := float32(item.Line_count) / float32(to) * 100
 				// found valid extension hence setting as true
 				valid_ext = true
 				table.Append([]string{
@@ -102,7 +116,7 @@ func EmitTable(
 					fmt.Sprint(item.Code),
 					fmt.Sprintf("%.2f", item.Code_percent),
 				})
-				break
+				// break
 			}
 		}
 

@@ -5,16 +5,18 @@ import (
 )
 
 type FlagOptions struct {
-	Lang *string
-	Help *bool
-	JSON *bool
-	YAML *bool
-	Sort *bool
+	Lang  *string
+	NLang *string
+	Help  *bool
+	JSON  *bool
+	YAML  *bool
+	Sort  *bool
 }
 
 func HandleFlags(folder_name *string) FlagOptions {
 	// flag --ext
 	var lang = flag.String("ext", "none", "Filter based on extention")
+	var nlang = flag.String("excl-ext", "none", "Exclude files with certain extention")
 	var help = flag.Bool("help", false, "Shows help text")
 	var json = flag.Bool("json", false, "Get output in json format")
 	var yaml = flag.Bool("yaml", false, "Get output in yaml format")
@@ -25,10 +27,11 @@ func HandleFlags(folder_name *string) FlagOptions {
 		*folder_name = flag.Args()[0]
 	}
 	return FlagOptions{
-		Lang: lang,
-		Help: help,
-		JSON: json,
-		YAML: yaml,
-		Sort: sort,
+		Lang:  lang,
+		NLang: nlang,
+		Help:  help,
+		JSON:  json,
+		YAML:  yaml,
+		Sort:  sort,
 	}
 }
