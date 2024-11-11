@@ -53,6 +53,24 @@ stto --help
 
 N.B. 'jproc' is a json query tool writtrn in javascript. For more details check out the [repo](https://github.com/mainak55512/JSONProcessor).
 
+### Code of Conduct
+
+In the interest of fostering an open and welcoming environment, we ask that all contributors adhere to the following Code of Conduct:
+
+**Our Standards:**
+- Use welcoming and inclusive language.
+- Respect differing viewpoints and experiences.
+- Accept constructive feedback gracefully.
+- Prioritize the community’s well-being.
+- Show empathy towards other community members.
+
+**Unacceptable Behaviors:**
+- Use of sexualized language, harassment, or unwelcome attention.
+- Trolling, insulting comments, or personal attacks.
+- Publishing private information without consent.
+
+For any concerns or reports of unacceptable behavior, please contact [Mainak Bhattacharjee](https://github.com/mainak55512).
+
 ## 🚀 About Me
 I'm a Tech enthusiast and a hobby programmer.
 You can visit my [Github profile](https://github.com/mainak55512) to see my other works :)
