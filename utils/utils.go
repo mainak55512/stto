@@ -50,17 +50,18 @@ This emits help text when --help tag is called
 */
 func EmitHelpText() string {
 
-	versionDetails := `0.1.9`
+	versionDetails := `0.1.10`
 	authorDetails := `mainak55512 (mbhattacharjee432@gmail.com)`
-	flagDetails := "--help\n--ext [list extension name]\n--excl-ext [list of extension name]\n--json\n--yaml\n--sort"
+	flagDetails := "--help\n--ext [list extension name]\n--excl-ext [list of extension name]\n--excl-dir folder-name\n--json\n--yaml\n--sort"
 	helpFlagDetails := "--help\tShows the usage details\n\n\tstto --help or,\n\tstto -help\n\n"
 	extFlagDetails := "--ext\tFilters output based on the given extension\n\n\tstto --ext [extension name] [(optional) folder name] or,\n\tstto -ext [extension name] [(optional) folder name]\n\n"
 	exclextFlagDetails := "--excl-ext\tFilters out files from output based on the given extension\n\n\tstto --excl-ext [extension name] [(optional) folder name] or,\n\tstto -excl-ext [extension name] [(optional) folder name]\n\n"
+	exclDirFlagDetails := "--excl-dir\tFilters out folder from output\n\n\tstto --excl-dir [folder name] or,\n\tstto -excl-dir [folder name]\n\n"
 	jsonFlagDetails := "--json\tEmits output in JSON format\n\n\tstto --json\n\n"
 	yamlFlagDetails := "--yaml\tEmits output in YAML format\n\n\tstto --yaml\n\n"
 	sortFlagDetails := "--sort\tSorts output based on descending line count\n\n\tstto --sort\n\n"
 	generalUsageDetails := "\n\n[General usage]:\n\tstto or,\n\tstto [folder name]"
-	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails + exclextFlagDetails + jsonFlagDetails + yamlFlagDetails + sortFlagDetails
+	returnText := "\nSTTO: a simple and quick line of code counter.\nAuthor: " + authorDetails + "\nVersion: " + versionDetails + generalUsageDetails + "\n\n[Flags]:\n" + flagDetails + "\n[Usage]:\n" + helpFlagDetails + extFlagDetails + exclextFlagDetails + exclDirFlagDetails + jsonFlagDetails + yamlFlagDetails + sortFlagDetails
 
 	return returnText
 }

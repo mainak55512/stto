@@ -12,6 +12,7 @@ func ProcessConcurrentWorkers(
 	is_git_initialized *bool,
 	mu *sync.RWMutex,
 	wg *sync.WaitGroup,
+	skipDir string,
 ) error {
 
 	// Limited goroutines to 50
@@ -20,7 +21,7 @@ func ProcessConcurrentWorkers(
 	// Buffered jobs channel
 	jobs := make(chan utils.File_info, 100)
 
-	files, err := utils.GetFiles(is_git_initialized, folder_count, *folder_name)
+	files, err := utils.GetFiles(is_git_initialized, folder_count, *folder_name, skipDir)
 
 	if err != nil {
 		return err

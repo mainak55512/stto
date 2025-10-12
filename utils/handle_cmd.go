@@ -11,6 +11,7 @@ type FlagOptions struct {
 	JSON  *bool
 	YAML  *bool
 	Sort  *bool
+	NDir  *string
 }
 
 func HandleFlags(folder_name *string) FlagOptions {
@@ -21,6 +22,7 @@ func HandleFlags(folder_name *string) FlagOptions {
 	var json = flag.Bool("json", false, "Get output in json format")
 	var yaml = flag.Bool("yaml", false, "Get output in yaml format")
 	var sort = flag.Bool("sort", false, "Sort result in descending order")
+	var nDir = flag.String("excl-dir", "none", "Exclude Directory")
 
 	flag.Parse()
 	if len(flag.Args()) > 0 {
@@ -33,5 +35,6 @@ func HandleFlags(folder_name *string) FlagOptions {
 		JSON:  json,
 		YAML:  yaml,
 		Sort:  sort,
+		NDir:  nDir,
 	}
 }

@@ -7,8 +7,8 @@ import (
 	"github.com/mainak55512/stto/utils"
 )
 
-func ProcessCount(count_details *[]utils.OutputStructure, file_details *[]utils.File_details, folder_name *string, is_git_initialized *bool, folder_count *int32, mu *sync.RWMutex, wg *sync.WaitGroup) (utils.TotalCount, error) {
-	err := ProcessConcurrentWorkers(file_details, folder_count, folder_name, is_git_initialized, mu, wg)
+func ProcessCount(count_details *[]utils.OutputStructure, file_details *[]utils.File_details, folder_name *string, is_git_initialized *bool, folder_count *int32, mu *sync.RWMutex, wg *sync.WaitGroup, skipDir string) (utils.TotalCount, error) {
+	err := ProcessConcurrentWorkers(file_details, folder_count, folder_name, is_git_initialized, mu, wg, skipDir)
 	if err != nil {
 		return utils.TotalCount{}, fmt.Errorf("%w", err)
 	}
@@ -43,12 +43,15 @@ func ProcessCount(count_details *[]utils.OutputStructure, file_details *[]utils.
 func ProcessByFlags(count_details *[]utils.OutputStructure, file_details *[]utils.File_details, folder_name *string, is_git_initialized *bool, folder_count *int32, mu *sync.RWMutex, wg *sync.WaitGroup) {
 
 	inpFlags := utils.HandleFlags(folder_name)
-
+	var skipDir string
+	if *inpFlags.NDir != "none" {
+		skipDir = *inpFlags.NDir
+	}
 	if *inpFlags.Help == true {
 		fmt.Println(utils.EmitHelpText())
 	} else {
 		if *inpFlags.JSON == true {
-			_, err := ProcessCount(count_details, file_details, folder_name, is_git_initialized, folder_count, mu, wg)
+			_, err := ProcessCount(count_details, file_details, folder_name, is_git_initialized, folder_count, mu, wg, skipDir)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%w", err))
 			}
@@ -61,7 +64,7 @@ func ProcessByFlags(count_details *[]utils.OutputStructure, file_details *[]util
 			}
 			fmt.Println(jsonOutput)
 		} else if *inpFlags.YAML == true {
-			_, err := ProcessCount(count_details, file_details, folder_name, is_git_initialized, folder_count, mu, wg)
+			_, err := ProcessCount(count_details, file_details, folder_name, is_git_initialized, folder_count, mu, wg, skipDir)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%w", err))
 			}
@@ -74,7 +77,7 @@ func ProcessByFlags(count_details *[]utils.OutputStructure, file_details *[]util
 			}
 			fmt.Println(yamlOutput)
 		} else {
-			total_counts, err := ProcessCount(count_details, file_details, folder_name, is_git_initialized, folder_count, mu, wg)
+			total_counts, err := ProcessCount(count_details, file_details, folder_name, is_git_initialized, folder_count, mu, wg, skipDir)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%w", err))
 			}
