@@ -86,13 +86,15 @@ func GetFiles(
 	guardDir <- struct{}{}
 	wgDir.Add(1)
 
-	err := walkDirConcur(folder_location, folder_count, &files, is_git_initialized, wgDir, muDir, guardDir, skipDir)
+	skipFilePathList := _getPathList(skipDir)
+
+	err := walkDirConcur(folder_location, folder_count, &files, is_git_initialized, wgDir, muDir, guardDir, skipFilePathList)
 	wgDir.Wait()
 
 	return files, err
 }
 
-func walkDirConcur(folder_location string, folder_count *int32, files *[]File_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex, guardDir chan struct{}, skipDir string) error {
+func walkDirConcur(folder_location string, folder_count *int32, files *[]File_info, is_git_initialized *bool, wgDir *sync.WaitGroup, muDir *sync.RWMutex, guardDir chan struct{}, skipDir []string) error {
 	defer wgDir.Done()
 
 	visitFolder := func(
@@ -114,17 +116,19 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]File_in
 			}
 			muDir.Unlock()
 		}
-		if skipDir != "" && _path == skipDir {
+		if len(skipDir) != 0 && _isPresent(skipDir, _path) {
 			return filepath.SkipDir
 		}
 		// if it is a folder, then increase the folder count
-		if f.IsDir() && _path != folder_location && _path != path.Join(folder_location, skipDir) {
+		// if f.IsDir() && _path != folder_location && _path != path.Join(folder_location, skipDir) {
+
+		if f.IsDir() && _path != folder_location && !_isPresent(skipDir, _path) {
 			muDir.Lock()
 			*folder_count++
 			muDir.Unlock()
 			guardDir <- struct{}{}
 			wgDir.Add(1)
-			go walkDirConcur(_path, folder_count, files, is_git_initialized, wgDir, muDir, guardDir, "")
+			go walkDirConcur(_path, folder_count, files, is_git_initialized, wgDir, muDir, guardDir, skipDir)
 			return filepath.SkipDir
 		}
 		if f.Type().IsRegular() {
@@ -149,4 +153,21 @@ func walkDirConcur(folder_location string, folder_count *int32, files *[]File_in
 	err := filepath.WalkDir(folder_location, visitFolder)
 	<-guardDir
 	return err
+}
+
+func _getPathList(filePath string) []string {
+	var filePathList []string
+	for _, elem := range strings.Split(filePath, ",") {
+		filePathList = append(filePathList, strings.TrimSpace(elem))
+	}
+	return filePathList
+}
+
+func _isPresent(filePathList []string, filePath string) bool {
+	for _, elem := range filePathList {
+		if elem == filePath {
+			return true
+		}
+	}
+	return false
 }
